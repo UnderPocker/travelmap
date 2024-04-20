@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+
 
 @Data
 @AllArgsConstructor
@@ -28,6 +28,6 @@ public class WorkDaySchedule {
 
     @Override
     public String toString() {
-        return isAllDay ? "24/7" : workingHours[0].toString();
+        return isAllDay ? "24/7" : workingHours != null ? workingHours[0].toString() : comment;
     }
 }

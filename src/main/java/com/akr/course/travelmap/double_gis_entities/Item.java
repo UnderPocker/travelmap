@@ -69,6 +69,8 @@ public class Item {
     }
 
     public String getCost(){
+        if (context.getStopFactors() == null)
+            return null;
         for (StopFactor stopFactor : context.getStopFactors()) {
             if (stopFactor.getTag() != null && stopFactor.getTag().equals("food_service_avg_price")){
                 String name = stopFactor.getName();

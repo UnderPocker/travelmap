@@ -23,7 +23,8 @@ public class SearchServiceImpl implements SearchService{
 
         urlParams.put("region_id", "19");
         urlParams.put("key", apiKey);
-        urlParams.put("rubric_id", StringUtils.collectionToDelimitedString(searchFilters.getTypes(), ","));
+        if (searchFilters.getTypes() != null && !searchFilters.getTypes().isEmpty())
+            urlParams.put("rubric_id", StringUtils.collectionToDelimitedString(searchFilters.getTypes(), ","));
         urlParams.put("work_time", "now");
 
         String[] fields = new String[]{"items.point", "items.external_content", "items.rubrics", "items.schedule", "items.reviews", "items.ads.options", "items.context"};
@@ -35,6 +36,8 @@ public class SearchServiceImpl implements SearchService{
         if (searchFilters.getLon() != null && searchFilters.getLat() != null) {
             urlParams.put("lon", searchFilters.getLon());
             urlParams.put("lat", searchFilters.getLat());
+            if (searchFilters.getMaxDistance() == null)
+                urlParams.put("radius", 15000);
         }
 
         if (searchFilters.getPage() != null){
@@ -62,16 +65,16 @@ public class SearchServiceImpl implements SearchService{
     }
 
     private static String getRatingTag(SearchFilters searchFilters) {
-        if (searchFilters.getMinRating() == 3.0) {
+        if (searchFilters.getMinRating() <= 3.01) {
             return  "rating_rating_not_bad";
-        } else if (searchFilters.getMinRating() == 3.5) {
+        } else if (searchFilters.getMinRating() <= 3.51) {
             return  "rating_rating_nice";
-        } else if (searchFilters.getMinRating() == 4.0) {
+        } else if (searchFilters.getMinRating() <= 4.01) {
             return  "rating_rating_pretty_good";
-        } else if (searchFilters.getMinRating() == 4.5) {
+        } else if (searchFilters.getMinRating() <= 4.51) {
             return  "rating_rating_excellent";
         }
-        else if (searchFilters.getMinRating() == 4.9){
+        else if (searchFilters.getMinRating() <= 4.91){
             return "rating_rating_perfect";
         }
         return null;
@@ -110,6 +113,7 @@ public class SearchServiceImpl implements SearchService{
         placeDto.setPhone(item.getPhone());
         placeDto.setWorkTime(item.getTodaySchedule());
         placeDto.setCost(item.getCost());
+        placeDto.setDoubleGisLink("https://2gis.ru/n_novgorod/firm/" + item.getId());
 
         ExternalContent[] externalContents = item.getExternalContents();
         List<String> photos = Arrays.stream(externalContents).map(ExternalContent::getMainPhotoUrl).collect(Collectors.toList());
@@ -130,9 +134,17 @@ public class SearchServiceImpl implements SearchService{
     @Override
     public List<Item> searchItems(Map<String, Object> params) {
         String url = "https://catalog.api.2gis.com/3.0/items";
-        Result responseResult = getDoubleGisResponseFromUrl(url, params).getResult();
-        if (responseResult == null || responseResult.getItems().isEmpty())
-            return Collections.emptyList();
+        DoubleGisResponse doubleGisResponse = getDoubleGisResponseFromUrl(url, params);
+        Result responseResult = doubleGisResponse.getResult();
+        System.out.println(responseResult);
+
+        if (responseResult == null || responseResult.getItems().isEmpty()){
+            if (doubleGisResponse.getMeta().getCode() == 404)
+                return Collections.emptyList();
+            else
+                throw new RuntimeException(doubleGisResponse.getError().getMessage());
+        }
+
         return responseResult.getItems();
     }
 
@@ -148,8 +160,9 @@ public class SearchServiceImpl implements SearchService{
 
         RestTemplate restTemplate = new RestTemplate();
 
-        String query = builder.toUriString();
+        String query = builder.build().toUriString();
         System.out.println(query);
+        //System.out.println(restTemplate.getForObject(query, String.class));
         return restTemplate.getForObject(query, DoubleGisResponse.class);
     }
 }
