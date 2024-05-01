@@ -1,5 +1,6 @@
-package com.akr.course.travelmap.double_gis_entities;
+package com.akr.course.travelmap.double_gis_entities.places_api;
 
+import com.akr.course.travelmap.double_gis_entities.Point;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -35,10 +36,10 @@ public class Item {
     private Map<String, WorkDaySchedule> schedule;
     private Context context;
 
-    public String getLon(){
+    public Double getLon(){
         return point.getLon();
     }
-    public String getLat(){
+    public Double getLat(){
         return point.getLat();
     }
     public String getLink(){

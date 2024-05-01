@@ -11,16 +11,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(description = "Сущность места")
-public class PlaceDto {
+public class Place {
     @NotNull
     @Schema(example = "70000001039646535")
     private String id;
     @NotNull
     @Schema(example = "44.005713")
-    private String lon;
+    private Double lon;
     @NotNull
     @Schema(example = "56.32716")
-    private String lat;
+    private Double lat;
     private List<String> photos;
     @NotNull
     @Schema(example = "Нижегородский кремль, музей-заповедник")

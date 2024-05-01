@@ -1,7 +1,7 @@
 package com.akr.course.travelmap.service;
 
-import com.akr.course.travelmap.double_gis_entities.*;
-import com.akr.course.travelmap.dto.PlaceDto;
+import com.akr.course.travelmap.double_gis_entities.places_api.*;
+import com.akr.course.travelmap.dto.Place;
 import com.akr.course.travelmap.dto.SearchFilters;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,8 +17,9 @@ import java.util.stream.Collectors;
 public class SearchServiceImpl implements SearchService{
     @Value("${apiKey}")
     private String apiKey;
+    private static final String URL = "https://catalog.api.2gis.com/3.0/items";
     @Override
-    public List<PlaceDto> searchPlaces(SearchFilters searchFilters) {
+    public List<Place> searchPlaces(SearchFilters searchFilters) {
         Map<String, Object> urlParams = new HashMap<>();
 
         urlParams.put("region_id", "19");
@@ -60,8 +61,13 @@ public class SearchServiceImpl implements SearchService{
             urlParams.put("sort", searchFilters.getSort());
         }
 
-        List<Item> items = searchItems(urlParams);
+        List<Item> items = searchItems(URL, urlParams);
         return convertItemsToPlacesDto(items);
+    }
+
+    @Override
+    public List<Place> searchPlacesById(List<String> ids) {
+        return convertItemsToPlacesDto(searchItemsById(ids));
     }
 
     private static String getRatingTag(SearchFilters searchFilters) {
@@ -81,62 +87,55 @@ public class SearchServiceImpl implements SearchService{
     }
 
     @Override
-    public Point getItemPoint(String id) {
-        Map<String, Object> params = new HashMap<>();
-
-        params.put("key", apiKey);
-        params.put("fields", "items.point");
-
-        Item item = searchItemById(id, params);
-
-        return item.getPoint();
-    }
-
-    @Override
-    public List<PlaceDto> convertItemsToPlacesDto(List<Item> items) {
+    public List<Place> convertItemsToPlacesDto(List<Item> items) {
         return items.stream().map(this::convertItemToPlaceDto).collect(Collectors.toList());
     }
 
     @Override
-    public PlaceDto convertItemToPlaceDto(Item item) {
-        PlaceDto placeDto = new PlaceDto();
+    public Place convertItemToPlaceDto(Item item) {
+        Place place = new Place();
 
-        placeDto.setId(item.getId());
-        placeDto.setName(item.getName());
-        placeDto.setAddress(item.getAddress());
-        placeDto.setLon(item.getLon());
-        placeDto.setLat(item.getLat());
-        placeDto.setType(item.getRubrics()[0].getId());
-        placeDto.setRating(item.getReviews().getRating());
-        placeDto.setReviews(item.getReviews().getReviewCount());
-        placeDto.setLink(item.getLink());
-        placeDto.setPhone(item.getPhone());
-        placeDto.setWorkTime(item.getTodaySchedule());
-        placeDto.setCost(item.getCost());
-        placeDto.setDoubleGisLink("https://2gis.ru/n_novgorod/firm/" + item.getId());
+        place.setId(item.getId());
+        place.setName(item.getName());
+        place.setAddress(item.getAddress());
+        place.setLon(item.getLon());
+        place.setLat(item.getLat());
+        place.setType(item.getRubrics()[0].getId());
+        place.setRating(item.getReviews().getRating());
+        place.setReviews(item.getReviews().getReviewCount());
+        place.setLink(item.getLink());
+        place.setPhone(item.getPhone());
+        place.setWorkTime(item.getTodaySchedule());
+        place.setCost(item.getCost());
+        place.setDoubleGisLink("https://2gis.ru/n_novgorod/firm/" + item.getId());
 
         ExternalContent[] externalContents = item.getExternalContents();
         List<String> photos = Arrays.stream(externalContents).map(ExternalContent::getMainPhotoUrl).collect(Collectors.toList());
 
-        placeDto.setPhotos(photos);
+        place.setPhotos(photos);
 
-        return placeDto;
+        return place;
     }
 
     @Override
-    public Item searchItemById(String id, Map<String, Object> params) {
-        String url = "https://catalog.api.2gis.com/3.0/items/byid";
-        params.put("id", id);
-        Result responseResult = getDoubleGisResponseFromUrl(url, params).getResult();
-        return responseResult.getItems().get(0);
+    public List<Item> searchItemsById(List<String> ids) {
+        String url = URL + "/byid";
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", StringUtils.collectionToDelimitedString(ids, ","));
+        params.put("region_id", "19");
+        params.put("key", apiKey);
+        String[] fields = new String[]{"items.point", "items.external_content", "items.rubrics", "items.schedule", "items.reviews", "items.ads.options", "items.context"};
+        params.put("fields", StringUtils.collectionToDelimitedString(Arrays.asList(fields), ","));
+
+        return searchItems(url, params);
     }
 
     @Override
-    public List<Item> searchItems(Map<String, Object> params) {
-        String url = "https://catalog.api.2gis.com/3.0/items";
+    public List<Item> searchItems(String url, Map<String, Object> params) {
         DoubleGisResponse doubleGisResponse = getDoubleGisResponseFromUrl(url, params);
         Result responseResult = doubleGisResponse.getResult();
-        System.out.println(responseResult);
+        //System.out.println(responseResult);
 
         if (responseResult == null || responseResult.getItems().isEmpty()){
             if (doubleGisResponse.getMeta().getCode() == 404)
