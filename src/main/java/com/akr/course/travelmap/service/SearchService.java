@@ -2,8 +2,8 @@ package com.akr.course.travelmap.service;
 
 import com.akr.course.travelmap.double_gis_entities.places_api.DoubleGisResponse;
 import com.akr.course.travelmap.double_gis_entities.places_api.Item;
-import com.akr.course.travelmap.dto.Place;
-import com.akr.course.travelmap.dto.SearchFilters;
+import com.akr.course.travelmap.dto_entities.db_entities.Place;
+import com.akr.course.travelmap.dto_entities.SearchFilters;
 
 import java.util.List;
 import java.util.Map;

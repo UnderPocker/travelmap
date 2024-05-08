@@ -4,7 +4,7 @@ import com.akr.course.travelmap.double_gis_entities.Point;
 import com.akr.course.travelmap.double_gis_entities.distance_api.DataRequest;
 import com.akr.course.travelmap.double_gis_entities.distance_api.DoubleGisResponse;
 import com.akr.course.travelmap.double_gis_entities.distance_api.Route;
-import com.akr.course.travelmap.dto.Distance;
+import com.akr.course.travelmap.dto_entities.Distance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

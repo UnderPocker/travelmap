@@ -1,10 +1,12 @@
 package com.akr.course.travelmap.controller;
 
 
-import com.akr.course.travelmap.dto.Distance;
-import com.akr.course.travelmap.dto.Place;
-import com.akr.course.travelmap.dto.SearchFilters;
+import com.akr.course.travelmap.dto_entities.Distance;
+import com.akr.course.travelmap.dto_entities.db_entities.Place;
+import com.akr.course.travelmap.dto_entities.SearchFilters;
+import com.akr.course.travelmap.dto_entities.db_entities.Route;
 import com.akr.course.travelmap.service.DistanceService;
+import com.akr.course.travelmap.service.RouteService;
 import com.akr.course.travelmap.service.SearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +21,7 @@ import java.util.List;
 public class MyController {
     private SearchService searchService;
     private DistanceService distanceService;
+    private RouteService routeService;
 
     @Operation(
             summary = "Поиск мест в городе",
@@ -46,6 +49,19 @@ public class MyController {
         return searchService.searchPlacesById(ids);
     }
 
+    @Operation(
+            summary = "Получение рекомендуемых маршрутов"
+    )
+    @GetMapping("/routes")
+    public List<Route> getRecommendedRoutes(){
+        return routeService.getAllRecommendedRoutes();
+    }
+
+    @GetMapping("routes/add")
+    public void putRecommendedRoute(String title, String description,@RequestParam List<String> ids){
+        routeService.putRecommendedRoute(title, description, ids);
+    }
+
     @Autowired
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
@@ -53,5 +69,9 @@ public class MyController {
     @Autowired
     public void setDistanceService(DistanceService distanceService) {
         this.distanceService = distanceService;
+    }
+    @Autowired
+    public void setRouteService(RouteService routeService) {
+        this.routeService = routeService;
     }
 }

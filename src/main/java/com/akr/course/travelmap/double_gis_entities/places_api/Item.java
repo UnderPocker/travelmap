@@ -58,6 +58,8 @@ public class Item {
     }
 
     public String getTodaySchedule(){
+        if (schedule == null)
+            return null;
         if (schedule.containsKey("is_24x7") && schedule.get("is_24x7").isAllDay())
             return schedule.get("is_24x7").toString();
 

@@ -1,8 +1,8 @@
 package com.akr.course.travelmap.service;
 
 import com.akr.course.travelmap.double_gis_entities.places_api.*;
-import com.akr.course.travelmap.dto.Place;
-import com.akr.course.travelmap.dto.SearchFilters;
+import com.akr.course.travelmap.dto_entities.db_entities.Place;
+import com.akr.course.travelmap.dto_entities.SearchFilters;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -100,7 +100,7 @@ public class SearchServiceImpl implements SearchService{
         place.setAddress(item.getAddress());
         place.setLon(item.getLon());
         place.setLat(item.getLat());
-        place.setType(item.getRubrics()[0].getId());
+        place.setType(item.getRubrics() != null ? item.getRubrics()[0].getId() : null);
         place.setRating(item.getReviews().getRating());
         place.setReviews(item.getReviews().getReviewCount());
         place.setLink(item.getLink());

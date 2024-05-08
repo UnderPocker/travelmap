@@ -1,4 +1,4 @@
-package com.akr.course.travelmap.dto;
+package com.akr.course.travelmap.dto_entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
