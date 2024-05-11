@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 @Data
 @AllArgsConstructor
@@ -78,4 +79,11 @@ public class Place {
 
     @Column
     private String phone;
+
+    @Override
+    protected Place clone() throws CloneNotSupportedException {
+        Place place = (Place)super.clone();
+        place.photos = new ArrayList<>(this.photos);
+        return place;
+    }
 }

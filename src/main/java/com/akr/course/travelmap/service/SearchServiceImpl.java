@@ -23,6 +23,7 @@ public class SearchServiceImpl implements SearchService{
         Map<String, Object> urlParams = new HashMap<>();
 
         urlParams.put("region_id", "19");
+        //urlParams.put("city_id", "2674635049009413");
         urlParams.put("key", apiKey);
         if (searchFilters.getTypes() != null && !searchFilters.getTypes().isEmpty())
             urlParams.put("rubric_id", StringUtils.collectionToDelimitedString(searchFilters.getTypes(), ","));
@@ -39,21 +40,36 @@ public class SearchServiceImpl implements SearchService{
             urlParams.put("lat", searchFilters.getLat());
             if (searchFilters.getMaxDistance() == null)
                 urlParams.put("radius", 15000);
+            else
+                urlParams.put("radius", searchFilters.getMaxDistance());
         }
 
         if (searchFilters.getPage() != null){
             urlParams.put("page", searchFilters.getPage());
         }
 
-        if (searchFilters.getMaxPrice() != null && searchFilters.getMinPrice() != null)
-            urlParams.put("attr[food_service_avg_price]", searchFilters.getMinPrice() + "," + searchFilters.getMaxPrice());
+        if (searchFilters.getPriceRange() != null && searchFilters.getPriceRange() > 0){
+            int minPrice = 0, maxPrice = 4500;
+            switch (searchFilters.getPriceRange()){
+                case 1:
+                    maxPrice = 599;
+                    break;
+                case 2:
+                    minPrice = 600; maxPrice = 1499;
+                    break;
+                case 3:
+                    minPrice = 1500; maxPrice = 2499;
+                    break;
+                case 4:
+                    minPrice = 2500;
+                    break;
+            }
+            urlParams.put("attr[food_service_avg_price]", minPrice + "," + maxPrice);
 
-        if (searchFilters.getMaxDistance() != null)
-            urlParams.put("radius", searchFilters.getMaxDistance());
+        }
 
         if (searchFilters.getMinRating() != null){
             String ratingFilter = getRatingTag(searchFilters);
-            //if (ratingFilter == null), то что?
             urlParams.put("attr[" + ratingFilter + "]", "true");
         }
 
@@ -67,7 +83,18 @@ public class SearchServiceImpl implements SearchService{
 
     @Override
     public List<Place> searchPlacesById(List<String> ids) {
-        return convertItemsToPlacesDto(searchItemsById(ids));
+        List<Place> places = new ArrayList<>();
+
+        List<String> uniqueIds = new ArrayList<>(new HashSet<>(ids));
+        List<Place> uniquePlaces = convertItemsToPlacesDto(searchItemsById(uniqueIds));
+
+        for (String id : ids) {
+            Place place = uniquePlaces.stream().filter(
+                    uniquePlace -> uniquePlace.getId().equals(id)).findFirst().orElse(null);
+            places.add(place);
+        }
+
+        return places;
     }
 
     private static String getRatingTag(SearchFilters searchFilters) {
@@ -123,7 +150,6 @@ public class SearchServiceImpl implements SearchService{
 
         Map<String, Object> params = new HashMap<>();
         params.put("id", StringUtils.collectionToDelimitedString(ids, ","));
-        params.put("region_id", "19");
         params.put("key", apiKey);
         String[] fields = new String[]{"items.point", "items.external_content", "items.rubrics", "items.schedule", "items.reviews", "items.ads.options", "items.context"};
         params.put("fields", StringUtils.collectionToDelimitedString(Arrays.asList(fields), ","));

@@ -6,5 +6,4 @@ import java.util.List;
 
 public interface RouteService {
     List<Route> getAllRecommendedRoutes();
-    void putRecommendedRoute(String title, String description, List<String> ids);
 }

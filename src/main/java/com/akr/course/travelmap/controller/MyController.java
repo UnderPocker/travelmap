@@ -57,11 +57,6 @@ public class MyController {
         return routeService.getAllRecommendedRoutes();
     }
 
-    @GetMapping("routes/add")
-    public void putRecommendedRoute(String title, String description,@RequestParam List<String> ids){
-        routeService.putRecommendedRoute(title, description, ids);
-    }
-
     @Autowired
     public void setSearchService(SearchService searchService) {
         this.searchService = searchService;
