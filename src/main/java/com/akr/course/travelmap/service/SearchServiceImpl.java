@@ -18,6 +18,76 @@ public class SearchServiceImpl implements SearchService{
     @Value("${apiKey}")
     private String apiKey;
     private static final String URL = "https://catalog.api.2gis.com/3.0/items";
+    private static Map<Integer, Set<Integer>> types;
+
+    static {
+        types = new HashMap<>();
+        for (int i = 0; i < 3; i++) {
+            types.put(i, new HashSet<>());
+        }
+
+        Set<Integer> entertainment = types.get(0);
+        entertainment.addAll(Arrays.asList(192, 170, 173, 169, 21387, 6505, 51221, 51008, 685, 112872, 159,
+                167, 9508, 72370, 110345, 537, 110427, 110358, 11974, 111526, 24353));
+
+        Set<Integer> catering = types.get(1);
+        catering.addAll(Arrays.asList(161, 164, 159, 162, 166, 165, 15791, 51459, 112658, 52248, 363, 111594));
+
+        Set<Integer> culture = types.get(2);
+        culture.addAll(Arrays.asList(193, 168, 13787, 112670, 112668, 112720, 13374, 942, 199, 190));
+    }
+    /*static {
+        types = new HashMap<>();
+
+        //Досуг:
+        types.put(192, "Кинотеатры");
+        types.put(170, "Боулинг");
+        types.put(173, "Ночные клубы");
+        types.put(169, "Бильярдные залы");
+        types.put(21387, "Караоке-залы");
+        types.put(6505, "Стрелковые клубы");
+        types.put(51221, "Гольф-клубы");
+        types.put(51008, "Картинг");
+        types.put(685, "Цирк");
+        types.put(112872, "Уличные катки");
+        types.put(159, "Бары");
+        types.put(167, "Зоопарк");
+        types.put(9508, "Дельфинарий");
+        types.put(72370, "Антикафе");
+        types.put(110345, "Научно-развлекательные центры");
+        types.put(537, "Аквапарки / Водные аттракционы");
+        types.put(110427, "Батутные центры");
+        types.put(110358, "Аттракционы");
+        types.put(11974, "Ледовые дворцы / Катки");
+        types.put(111526, "Смотровые площадки");
+        types.put(24353, "Пляжи / Зоны пляжного отдыха");
+
+        //Поесть:
+        types.put(161, "Кафе");
+        types.put(164, "Рестораны");
+        types.put(159, "Бары");
+        types.put(162, "Кофейни");
+        types.put(166, "Столовые");
+        types.put(165, "Быстрое питание");
+        types.put(15791, "Суши-бары");
+        types.put(51459, "Пиццерии");
+        types.put(112658, "Кафе-кондитерские");
+        types.put(52248, "Рюмочные");
+        types.put(363, "Кондитерские изделия");
+        types.put(111594, "Пекарни");
+
+        //Культура:
+        types.put(193, "Музеи");
+        types.put(168, "Парки культуры и отдыха");
+        types.put(13787, "Дома / дворцы культуры");
+        types.put(112670, "Интересные здания");
+        types.put(112668, "Природные достопримечательности");
+        types.put(112720, "Фонтаны");
+        types.put(13374, "Мечети");
+        types.put(942, "Организация выставок");
+        types.put(199, "Театры");
+        types.put(190, "Художественные выставки / Галереи");
+    }*/
     @Override
     public List<Place> searchPlaces(SearchFilters searchFilters) {
         Map<String, Object> urlParams = new HashMap<>();
@@ -27,7 +97,6 @@ public class SearchServiceImpl implements SearchService{
         urlParams.put("key", apiKey);
         if (searchFilters.getTypes() != null && !searchFilters.getTypes().isEmpty())
             urlParams.put("rubric_id", StringUtils.collectionToDelimitedString(searchFilters.getTypes(), ","));
-        urlParams.put("work_time", "now");
 
         String[] fields = new String[]{"items.point", "items.external_content", "items.rubrics", "items.schedule", "items.reviews", "items.ads.options", "items.context"};
         urlParams.put("fields", StringUtils.collectionToDelimitedString(Arrays.asList(fields), ","));
@@ -76,6 +145,9 @@ public class SearchServiceImpl implements SearchService{
         if (searchFilters.getSort() != null){
             urlParams.put("sort", searchFilters.getSort());
         }
+
+        if (searchFilters.getIsWorkingNow() != null && searchFilters.getIsWorkingNow())
+            urlParams.put("work_time", "now");
 
         List<Item> items = searchItems(URL, urlParams);
         return convertItemsToPlacesDto(items);
@@ -127,7 +199,7 @@ public class SearchServiceImpl implements SearchService{
         place.setAddress(item.getAddress());
         place.setLon(item.getLon());
         place.setLat(item.getLat());
-        place.setType(item.getRubrics() != null ? item.getRubrics()[0].getId() : null);
+        place.setType(item.getRubrics() != null ? item.getRubrics()[0].getName() : null);
         place.setRating(item.getReviews().getRating());
         place.setReviews(item.getReviews().getReviewCount());
         place.setLink(item.getLink());
@@ -140,6 +212,19 @@ public class SearchServiceImpl implements SearchService{
         List<String> photos = Arrays.stream(externalContents).map(ExternalContent::getMainPhotoUrl).collect(Collectors.toList());
 
         place.setPhotos(photos);
+
+        String typeStr = item.getRubrics() != null ? item.getRubrics()[0].getId() : null;
+        if (typeStr != null) {
+            Integer type = Integer.parseInt(typeStr);
+
+            for (Map.Entry<Integer, Set<Integer>> pair : types.entrySet()) {
+                Set<Integer> set = pair.getValue();
+                if (set.contains(type)) {
+                    place.setGeneralType(pair.getKey());
+                    break;
+                }
+            }
+        }
 
         return place;
     }

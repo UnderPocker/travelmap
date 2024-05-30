@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface RouteService {
     List<Route> getAllRecommendedRoutes();
+    Route getRecommendedRoute(Integer id);
 }

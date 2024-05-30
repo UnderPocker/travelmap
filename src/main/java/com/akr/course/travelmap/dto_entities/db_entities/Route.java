@@ -17,7 +17,6 @@ public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column
-    @JsonIgnore
     private Integer id;
 
     @Column
@@ -25,6 +24,9 @@ public class Route {
 
     @Column
     private String description;
+
+    @Column
+    private String image;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "route_id")

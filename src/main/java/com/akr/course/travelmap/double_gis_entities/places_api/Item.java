@@ -67,7 +67,8 @@ public class Item {
         DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
 
         String dayOfWeekAbbreviation = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-
+        if (!schedule.containsKey(dayOfWeekAbbreviation))
+            return "closed";
         return schedule.get(dayOfWeekAbbreviation).toString();
     }
 

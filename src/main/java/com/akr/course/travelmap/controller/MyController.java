@@ -56,6 +56,14 @@ public class MyController {
     public List<Route> getRecommendedRoutes(){
         return routeService.getAllRecommendedRoutes();
     }
+    @Operation(
+            summary = "Получение рекомендуемого маршрута по id"
+    )
+    @GetMapping("/routes/byid")
+    public Route getRecommendedRoutes(Integer id){
+        return routeService.getRecommendedRoute(id);
+    }
+
 
     @Autowired
     public void setSearchService(SearchService searchService) {

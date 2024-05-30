@@ -45,7 +45,11 @@ public class Place {
     @Column(nullable = false)
     private String name;
 
-    @Schema(example = "193")
+    @Schema(allowableValues = {"0", "1", "2"}, example = "1", description = "0 - Досуг, 1 - Поесть, 2 - Культура")
+    @Column(name = "general_type")
+    private Integer generalType;
+
+    @Schema(example = "Музеи")
     @Column
     private String type;
 

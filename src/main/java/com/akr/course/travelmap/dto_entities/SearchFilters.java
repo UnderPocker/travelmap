@@ -26,4 +26,6 @@ public class SearchFilters {
     @Schema(description = "0 - диапазон не выбран, далее чем выше priceRange, тем выше сдвигается дипазон, при \"4\" - до 4500р", allowableValues = {"0", "1", "2", "3", "4"}, example = "2", nullable = true)
     private Integer priceRange;
     private Integer maxDistance;
+    @Schema(description = "Работает ли сейчас заведение")
+    private Boolean isWorkingNow;
 }
