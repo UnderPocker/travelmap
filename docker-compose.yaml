@@ -6,6 +6,7 @@ services:
     build: .
     ports:
       - "8080:8080"
+    image: underpocker/travelmap-backend
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/travelmap
       - SPRING_DATASOURCE_USERNAME=root
@@ -19,6 +20,7 @@ services:
       context: .
       dockerfile: ./db/Dockerfile
     restart: always
+    image: underpocker/travelmap-mysql
     environment:
       - MYSQL_ROOT_PASSWORD=springcourse
       - MYSQL_DATABASE=travelmap
